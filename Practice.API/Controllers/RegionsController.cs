@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Practice.API.CustomActionFilters;
 using Practice.API.Data;
 using Practice.API.Models.Domain;
 using Practice.API.Models.DTO;
@@ -13,13 +14,11 @@ namespace Practice.API.Controllers
     [ApiController]
     public class RegionsController : ControllerBase
     {
-        private readonly PracticeDbContext dbContext;
         private readonly IRegionRepository regionRepository;
         private readonly IMapper mapper;
 
-        public RegionsController(PracticeDbContext dbContext , IRegionRepository regionRepository,IMapper mapper)
+        public RegionsController(IRegionRepository regionRepository,IMapper mapper)
         {
-            this.dbContext = dbContext;
             this.regionRepository = regionRepository;
             this.mapper = mapper;
         }
@@ -46,16 +45,27 @@ namespace Practice.API.Controllers
         }
         
         [HttpPost]
+        [ValidateModel]
         public async Task<IActionResult> Create([FromBody] AddRegionRequestDto regionRequestDto)
         {
-            //from dto to domain map
-            var addregion_domain = mapper.Map<Region>(regionRequestDto);
+            // This is Model State validation which check the data annotation in dtos
+            //if validate model is used at data annotation then this would not be used
 
-            addregion_domain = await regionRepository.CreateAsync(addregion_domain);
-            //from domain to dto map
-            var addregiondto = mapper.Map<RegionDto>(addregion_domain);
+            //if (ModelState.IsValid)
+            //{
+                //from dto to domain map
+                var addregion_domain = mapper.Map<Region>(regionRequestDto);
 
-            return CreatedAtAction(nameof(GetById), new { id = addregiondto.Id }, addregiondto);
+                addregion_domain = await regionRepository.CreateAsync(addregion_domain);
+                //from domain to dto map
+                var addregiondto = mapper.Map<RegionDto>(addregion_domain);
+
+                return CreatedAtAction(nameof(GetById), new { id = addregiondto.Id }, addregiondto);
+            //}
+            //else
+            //{
+            //  return BadRequest(ModelState);
+            //}
         }
        
         #region CreateRegion without automapper
@@ -85,17 +95,20 @@ namespace Practice.API.Controllers
         
         
         [HttpPut]
+        [ValidateModel]
         [Route("{id:guid}")]
         public async Task<IActionResult> Update([FromRoute] Guid id , [FromBody] UpdateRegionRequestDto updateRegionRequest)
         {
+            
             var domainregion = mapper.Map<Region>(updateRegionRequest);
 
-            domainregion = await regionRepository.UpdateAsync(id , domainregion);
+            domainregion = await regionRepository.UpdateAsync(id, domainregion);
 
             if (domainregion == null) { NotFound(); }
-            
+
             var updatedregion_dto = mapper.Map<RegionDto>(domainregion);
             return Ok(updatedregion_dto);
+            
         }
 
         [HttpDelete]

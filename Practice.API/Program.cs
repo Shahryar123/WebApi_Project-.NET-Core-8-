@@ -17,6 +17,7 @@ builder.Services.AddDbContext<PracticeDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("PracticeConnectionString")));
 
 builder.Services.AddScoped<IRegionRepository , SqlRegionRepository>();
+builder.Services.AddScoped<IWalksRepository , SqlWalkRepository>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 

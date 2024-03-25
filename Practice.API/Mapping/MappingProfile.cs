@@ -9,9 +9,15 @@ namespace Practice.API.Mapping
         public MappingProfile()
         {
             //MAP REGION MODEL TO DTO AND VISE VERSA
-            CreateMap<Region , RegionDto>().ReverseMap();
+            CreateMap<Region, RegionDto>().ReverseMap();
             CreateMap<Region, AddRegionRequestDto>().ReverseMap();
             CreateMap<Region, UpdateRegionRequestDto>().ReverseMap();
+
+            CreateMap<Walk, WalkDto>().ReverseMap();
+            CreateMap<Walk, AddWalkRequestDto>().ReverseMap();
+            CreateMap<Walk, UpdateWalkRequestDto>().ReverseMap();
+
+            CreateMap<Difficuilty, DifficuiltyDto>().ReverseMap();
         }
     }
 }
