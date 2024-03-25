@@ -20,10 +20,18 @@ namespace Practice.API.Controllers
             this.walksRepository = walksRepository;
             this.mapper = mapper;
         }
+
+        // FILTERING PAGINATION AND SORTING DONE HERE
+
+        // api/walks/filterOn=Name&filterQuery=track&sortBy=Length&isAscending=true
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(
+            [FromQuery] string? filterOn = null ,[FromQuery] string? filterQuery = null,
+            [FromQuery] string? sortBy = null , [FromQuery] bool? isAscending = null,
+            [FromQuery] int pageNo = 1, [FromQuery] int pageSize = 1000)
         {
-            var walksDomain = await walksRepository.GetAllAsync();
+            var walksDomain = await walksRepository
+                .GetAllAsync(filterOn , filterQuery , sortBy , isAscending??true , pageNo , pageSize);
 
             //Map WalksModel to RegionDto
             var walksDto = mapper.Map<List<WalkDto>>(walksDomain);
