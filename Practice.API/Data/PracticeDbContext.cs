@@ -5,7 +5,7 @@ namespace Practice.API.Data
 {
     public class PracticeDbContext : DbContext
     {
-        public PracticeDbContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
+        public PracticeDbContext(DbContextOptions<PracticeDbContext> dbContextOptions) : base(dbContextOptions)
         {
 
         }

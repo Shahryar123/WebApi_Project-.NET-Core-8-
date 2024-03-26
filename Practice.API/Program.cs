@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Practice.API.Data;
@@ -19,6 +20,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<PracticeDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("PracticeConnectionString")));
 
+builder.Services.AddDbContext<PracticeAuthDbContext>(options => 
+    options.UseSqlServer(builder.Configuration.GetConnectionString("PracticeAuthConnectionString")));
+
 builder.Services.AddScoped<IRegionRepository , SqlRegionRepository>();
 builder.Services.AddScoped<IWalksRepository , SqlWalkRepository>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -37,6 +41,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .GetBytes(builder.Configuration["Jwt:Key"]))
     }
     );
+
+builder.Services.AddIdentityCore<IdentityUser>()
+    .AddRoles<IdentityRole>()
+    .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("Practice")
+    .AddEntityFrameworkStores<PracticeAuthDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.Configure<IdentityOptions>(options =>
+   { 
+       options.Password.RequireDigit = false;
+       options.Password.RequireNonAlphanumeric = false;
+       options.Password.RequireUppercase = false;
+       options.Password.RequireLowercase = false;
+       options.Password.RequiredLength = 6;
+       options.Password.RequiredUniqueChars = 1;
+   });
 //*********
 
 var app = builder.Build();
