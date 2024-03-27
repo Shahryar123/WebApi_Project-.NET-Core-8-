@@ -1,17 +1,34 @@
 IMPORTANT *** WE CAN USED THE FOLLOWING TO CREATE IDENTITY IN THE DB SO THAT WE CAN INJECT JWT IN OUR DB
 
 1- First add new connectionstring for authentication
+
 2 - Create new dbcontext class for authentication that has authentication tables along with basic tables
+
 3- So when we register this new dbcontext class in programs.cs it will give error.
+
 4- So you have to give the type of db to the dbcontextoption in context constructor
+
 5- Now seed the data in new dbcontext class by providing the roles you want in your application
+
 6- These roles that you defined in the context class will be add in the db when u run migrations
+
 7- When u run the migration it will give error bcz of ambiguity of multiple context so used this
-	*Add-Migration "Auth Update DB" -Context "PracticeAuthDbContext"       //{Context "{ur context class name}"}
-	*Update-Database -Context "PracticeAuthDbContext" 
+	* Add-Migration "Auth Update DB" -Context "PracticeAuthDbContext"       //{Context "{ur context class name}"}
+	* Update-Database -Context "PracticeAuthDbContext" 
 	
 8- Now Setting up the identity in the program.cs file and also configure password conditions for authentication
 
 9- Now Create Auth Controller to create user and assign role to the user 
 
+10- Now after completeting the process of register user using identity we create login process to create token if
+    given user is register
 
+11- By using the repository pattern inject the createtoken methon in login function of authcontroller
+
+12- To make specific endpoint role based authorization used this
+	* [Authorize(Roles = "Writer,Reader")]
+
+13- Add Authorization to swagger
+	* Update Program.cs
+
+14- Remember to use Bearer before token to authorize

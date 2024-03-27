@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Practice.API.Models.DTO;
+using Practice.API.Repository;
 
 namespace Practice.API.Controllers
 {
@@ -10,10 +11,12 @@ namespace Practice.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UserManager<IdentityUser> userManager;
+        private readonly ITokenRepository tokenRepository;
 
-        public AuthController(UserManager<IdentityUser> userManager)
+        public AuthController(UserManager<IdentityUser> userManager , ITokenRepository tokenRepository)
         {
             this.userManager = userManager;
+            this.tokenRepository = tokenRepository;
         }
 
         //Create User
@@ -42,6 +45,32 @@ namespace Practice.API.Controllers
                 }
             }
             return BadRequest(identityResults);
+        }
+
+        // Here we used login to validate user and create token
+        [HttpPost]
+        [Route("Login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequest)
+        {
+            var user = await userManager.FindByEmailAsync(loginRequest.Username);
+            if(user != null)
+            {
+                var checkPassword = await userManager.CheckPasswordAsync(user, loginRequest.Password);
+                if(checkPassword)
+                {
+                    var userRoles = await userManager.GetRolesAsync(user);
+                    if(userRoles !=null)
+                    {
+                        var jwtToken = tokenRepository.CreateToken(user, userRoles.ToList());
+                        var response = new LoginResponseDto()
+                        {
+                            JwtToken = jwtToken
+                        };
+                        return Ok(response);
+                    }
+                }
+            }
+            return BadRequest("Email or Password is incorrect");
         }
     }
 }
