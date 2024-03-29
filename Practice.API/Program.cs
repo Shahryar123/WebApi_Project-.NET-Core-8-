@@ -7,6 +7,7 @@ using Practice.API.Mapping;
 using Practice.API.Repository;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +62,7 @@ builder.Services.AddDbContext<PracticeAuthDbContext>(options =>
 builder.Services.AddScoped<IRegionRepository , SqlRegionRepository>();
 builder.Services.AddScoped<IWalksRepository , SqlWalkRepository>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
+builder.Services.AddScoped<IImageRepository, UploadImageRepository>();
 //Add Automapper Service
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -96,6 +98,9 @@ builder.Services.Configure<IdentityOptions>(options =>
        options.Password.RequiredLength = 6;
        options.Password.RequiredUniqueChars = 1;
    });
+
+
+builder.Services.AddHttpContextAccessor();
 //*********
 
 var app = builder.Build();
@@ -106,6 +111,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+//To access the image saved in localpath
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(),"Images")),
+    RequestPath = "/Images"
+});
 
 app.UseHttpsRedirection();
 
