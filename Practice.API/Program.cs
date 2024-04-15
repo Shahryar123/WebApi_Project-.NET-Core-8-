@@ -8,6 +8,8 @@ using Practice.API.Repository;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.FileProviders;
+using Serilog;
+using Practice.API.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,17 @@ builder.Services.AddEndpointsApiExplorer();
 
 
 //*********
+// For Logging // used in regions controller
+
+var logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/Logs_perMinute.txt" , rollingInterval : RollingInterval.Day)
+    .MinimumLevel.Information()
+    .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
+
 
 //ForAuthorization
 builder.Services.AddSwaggerGen(options =>
@@ -111,6 +124,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+//Injection Global Exception Middleware
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 //To access the image saved in localpath
 app.UseStaticFiles(new StaticFileOptions

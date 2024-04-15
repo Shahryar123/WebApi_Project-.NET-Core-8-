@@ -8,6 +8,7 @@ using Practice.API.Data;
 using Practice.API.Models.Domain;
 using Practice.API.Models.DTO;
 using Practice.API.Repository;
+using System.Text.Json;
 
 namespace Practice.API.Controllers
 {
@@ -17,22 +18,35 @@ namespace Practice.API.Controllers
     {
         private readonly IRegionRepository regionRepository;
         private readonly IMapper mapper;
+        private readonly ILogger<RegionsController> logger;
 
-        public RegionsController(IRegionRepository regionRepository,IMapper mapper)
+        public RegionsController(IRegionRepository regionRepository,IMapper mapper, ILogger<RegionsController> logger)
         {
             this.regionRepository = regionRepository;
             this.mapper = mapper;
+            this.logger = logger;
         }
 
         [HttpGet]
-        [Authorize(Roles = "Reader")]
+        //[Authorize(Roles = "Reader")]
         public async Task<IActionResult> GetAll()
         {
-            var regionsDomain = await regionRepository.GetAllAsync();
+            try
+            {
+                // Used LogInformation because declare in program.cs
+                logger.LogInformation("Program Execution Started");
+                var regionsDomain = await regionRepository.GetAllAsync();
 
-            //Map RegionModel to RegionDto
-            var regionsDto = mapper.Map<List<RegionDto>>(regionsDomain);
-            return Ok(regionsDto);
+                //Map RegionModel to RegionDto
+                var regionsDto = mapper.Map<List<RegionDto>>(regionsDomain);
+                logger.LogInformation($"Get the Regions data: {JsonSerializer.Serialize(regionsDomain)}");
+                return Ok(regionsDto);
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex , ex.Message);
+                throw;
+            }
         }
         
         [HttpGet]
